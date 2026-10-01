@@ -27,6 +27,8 @@ Bindings are editable on `Player > PlayerInputController`. While grabbing a leve
 
 ## Team workflow
 
+**Start here: [Team setup and branch workflow](TEAM_WORKFLOW.md).** Everyone clones this repository; use one branch per task and a pull request into `main`.
+
 - Make a branch for each change and use pull requests for review.
 - Pull before starting work. Coordinate scene edits: Unity scene conflicts are harder to merge than scripts.
 - Commit assets together with their `.meta` files; move/rename assets through Unity.
@@ -44,3 +46,4 @@ The original game scene and hand assets are retained. Generated scene backups an
 ## Optional AI connection
 
 The embedded MCP for Unity package includes a Unity 6.6 object-lookup compatibility fix. MCP is optional for playing or editing the demo. Each developer configures their own local MCP server if desired; no credentials or local server process are included. Third-party package licensing is in its `LICENSE` file.
+
