@@ -1889,6 +1889,14 @@ MonoBehaviour:
       m_Groups: 
       m_Action: Reach depth
       m_Flags: 0
+    - m_Name: 
+      m_Id: f1a81cc1-c01f-450d-8ecc-8f666750f3ae
+      m_Path: <Mouse>/{ScrollVertical}
+      m_Interactions: 
+      m_Processors: 
+      m_Groups: 
+      m_Action: Reach depth
+      m_Flags: 0
     m_Flags: 0
     m_Priority: 0
   releaseCursor:
@@ -2800,7 +2808,7 @@ MonoBehaviour:
   maximumVerticalReach: 1
   distanceFromCamera: 2
   depthLimits: {x: 1, y: 10}
-  scrollSensitivity: 0.001
+  scrollSensitivity: 0.02
   reachOffset: {x: 0, y: -0.38}
   positionSpring: 650
   positionDamping: 42
