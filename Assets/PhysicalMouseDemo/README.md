@@ -10,14 +10,15 @@ For teammates: import `PhysicalMouseDemo.unitypackage` into a Unity 6 URP projec
 |---|---|
 | Move mouse | Move the animated hand within reach |
 | Mouse wheel | Move the reach target nearer/farther |
-| Hold left mouse | Rotate the camera; release to let momentum decay |
-| Hold right mouse and move forward/back | Move the hand away from / closer to the camera |
-| Hold E near an object | Grab it; release to drop/throw |
+| Hold right mouse | Rotate the camera; release to let momentum decay |
+| Hold Left Shift and move forward/back | Move the hand away from / closer to the camera |
+| Hold left mouse near an object | Grab it; release to drop/throw |
+| T | Toggle automatic edge turning |
 | Escape | Release the cursor |
-| Left mouse over Game view | Capture the cursor again |
+| Right mouse over Game view | Capture the cursor again |
 | Middle mouse / Tab | Reserved Point / Selection bindings, with debug feedback only |
 
-Try the green 1 kg cube, then the orange 8 kg cube. Move the sphere near the top of the blue flight stick or yellow lever, hold E, and move it sideways. While grabbing the flight stick, mouse X/Y moves along its base's local right/forward axes, regardless of camera direction. The lever accepts local sideways movement. Ordinary objects retain camera-relative movement; RMB switches vertical mouse motion to depth. LMB camera look takes priority. Cyan means neutral, amber means a nearby object is available, and green means holding. The display shows the candidate, held object, camera speed, and normalized control values.
+Try the green 1 kg cube, then the orange 8 kg cube. Move the sphere near the top of the blue flight stick or yellow lever, hold left mouse, and move it sideways. While grabbing the flight stick, mouse X/Y moves along its base's local right/forward axes, regardless of camera direction. The lever accepts local sideways movement. Ordinary objects retain camera-relative movement; Left Shift switches vertical mouse motion to depth. RMB camera look takes priority. Cyan means neutral, amber means a nearby object is available, and green means holding. The display shows the candidate, held object, camera speed, and normalized control values.
 
 ## Components
 
@@ -64,9 +65,12 @@ PhysicalMouseDemo
 
 At runtime the hand detaches from its parent so camera movement cannot teleport its Rigidbody. It keeps a reference to CameraPivot for calculating its target.
 
+The hand retains its camera-relative target and rotates with the camera while moving freely or carrying a cube. Its Rigidbody remains dynamic, so collisions and heavy objects can cause physical lag. Camera-motion compensation reduces that lag without teleporting held objects. Anchored controls retain their object-local movement frame.
+
 ## Values to experiment with
 
 - **Player / PlayerInputController:** expand the inline InputActions to edit Look, Grab, Point and Selection bindings. Defaults are centralized here.
+- **Player / EdgeTurnController:** toggle Mode Enabled, set Edge Margin Percent (distance inward from each screen edge), Maximum Turn Speed and Vertical Turning. Default margin is 20%, default maximum speed is 75 degrees/second. T toggles the mode in play; its binding is editable on PlayerInputController. Move the hand toward an edge to turn, and back toward the center to stop. Manual camera look overrides edge turning. Edge turning pauses while operating anchored controls or when the cursor is released.
 - **Player / CameraLookController:** sensitivity, acceleration, damping and pitch range. Lower damping produces a longer coast after releasing Look.
 - **PhysicalHand / PhysicalHandController:** sensitivity, smoothing, horizontal/vertical reach, depth range, depth-drag sensitivity, spring, damping and maximum force. Bounds limit the target; collisions and inertia can displace the physical sphere from it.
 - **PhysicalHand / GrabInteractor:** detection radius, spring, damping, maximum force and maximum stretch. A stretched grab releases automatically.
@@ -87,7 +91,7 @@ Camera look converts mouse delta into a desired angular velocity. Acceleration e
 
 ## Validation
 
-The updated automated Play Mode suite passed 38 checks with zero runtime errors. It checks RMB depth, visible hand/grip blending, object-relative movement, released control position and anchored bases. See the included JSON report for the latest result. The original run passed 27 checks with zero runtime console errors. It covered hand delta movement and target bounds, dynamic grabbing/releasing of both cubes, retained release velocity, mass response, shared lever/stick grabbing and rotation, retained constraints, camera coasting, decay and both pitch limits. In the same lift test the light cube moved about 0.311 m and the heavy cube about 0.130 m. The JSON report is included alongside this guide.
+The updated automated Play Mode suite includes edge-turn and camera-relative carrying regression checks. It checks depth dragging, visible hand/grip blending, object-relative movement, released control position and anchored bases. See the included JSON report for the latest result. The original run passed 27 checks with zero runtime console errors. It covered hand delta movement and target bounds, dynamic grabbing/releasing of both cubes, retained release velocity, mass response, shared lever/stick grabbing and rotation, retained constraints, camera coasting, decay and both pitch limits. In the same lift test the light cube moved about 0.311 m and the heavy cube about 0.130 m. The JSON report is included alongside this guide.
 
 These checks drive controller methods directly and verify bindings are present; they are not a substitute for testing real mouse feel on each teammate's computer. Use `Tools > Physical Mouse Demo > Run Play Mode Checks` with the demo active to repeat them. The report is written to the project's `Logs/PhysicalMouseDemo-tests.json`.
 

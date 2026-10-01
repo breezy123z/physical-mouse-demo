@@ -13,12 +13,15 @@ A Unity class prototype in which the mouse moves a physical, animated hand in th
 | Input | Action |
 |---|---|
 | Mouse movement | Move the hand |
-| Hold LMB | Camera look with rotational momentum |
-| Hold RMB + move mouse forward/back | Move the hand away/closer |
-| Hold E near an object | Grab; release E to let go |
+| Hold RMB | Camera look with rotational momentum |
+| Hold Left Shift + move mouse forward/back | Move the hand away/closer |
+| Hold LMB near an object | Grab; release LMB to let go |
+| T | Toggle edge turning |
 | Wheel | Adjust reach depth |
 | Escape | Release the cursor |
 | Middle mouse / Tab | Reserved Point / Selection inputs |
+
+The hand follows and rotates with the camera while carrying. Edge turning pans the view as the hand approaches the screen edges; adjust the activation margin and speed on Player > EdgeTurnController.
 
 Bindings are editable on `Player > PlayerInputController`. While grabbing a lever or flight stick, input follows its base's axes rather than the camera. Controls hold their released position. The visible hand blends between idle and grip; per-finger contact IK is not implemented.
 
@@ -34,7 +37,7 @@ Bindings are editable on `Player > PlayerInputController`. While grabbing a leve
 
 Gameplay components are in `Assets/PhysicalMouseDemo/Runtime`. Input, camera movement, physical hand following, grabbing, control readouts and visual animation are separate components.
 
-Read [the demo guide](Assets/PhysicalMouseDemo/README.md) for architecture and Inspector tuning. Run **Tools > Physical Mouse Demo > Run Play Mode Checks** with the demo scene active. The latest local run passed 38 checks with no runtime console errors; actual mouse feel should also be tested manually.
+Read [the demo guide](Assets/PhysicalMouseDemo/README.md) for architecture and Inspector tuning. Run **Tools > Physical Mouse Demo > Run Play Mode Checks** with the demo scene active. The Play Mode suite covers physical interaction, hand/camera following and edge-turn behavior; actual mouse feel should also be tested manually.
 
 The original game scene and hand assets are retained. Generated scene backups and machine-specific MCP connection scripts are not shared.
 

@@ -24,6 +24,13 @@ namespace PhysicalMouseDemo
         private Rigidbody body;
         private Vector3 target, smoothingVelocity;
         private bool initialized;
+        private Vector3 previousCameraPosition;
+        private Quaternion previousCameraRotation, rotationInCamera;
+        [SerializeField] private bool rotateWithCamera = true;
+        public bool UsesObjectFrame => movementObject && movementObject.MovementFrame;
+        public Vector2 MaximumReach => new Vector2(maximumHorizontalReach,maximumVerticalReach);
+        public void ConfigureViewReach() { maximumHorizontalReach=1.8f;maximumVerticalReach=1f; }
+        public Vector3 DesiredPosition => UsesObjectFrame ? movementObject.MovementFrame.TransformPoint(localGrabTarget) : cameraPivot.TransformPoint(new Vector3(reachOffset.x,reachOffset.y,distanceFromCamera));
         private Grabbable movementObject;
         private Vector3 localGrabOrigin, localGrabTarget;
         [Tooltip("Metres of depth per vertical mouse pixel while Depth Drag is held.")]
@@ -59,6 +66,8 @@ namespace PhysicalMouseDemo
             // A Rigidbody must not inherit the rotating camera's transform. Keep only the logical reference.
             transform.SetParent(null, true);
             target = body.position; initialized = true;
+            previousCameraPosition=cameraPivot.position;previousCameraRotation=cameraPivot.rotation;
+            rotationInCamera=Quaternion.Inverse(cameraPivot.rotation)*body.rotation;
         }
         private void Update()
         {
@@ -87,7 +96,13 @@ namespace PhysicalMouseDemo
             Vector3 desired = cameraPivot.TransformPoint(new Vector3(reachOffset.x, reachOffset.y, distanceFromCamera));
             if(movementObject && movementObject.MovementFrame) desired=movementObject.MovementFrame.TransformPoint(localGrabTarget);
             target = Vector3.SmoothDamp(target, desired, ref smoothingVelocity, smoothing, Mathf.Infinity, Time.fixedDeltaTime);
-            Vector3 force = (target - body.position) * positionSpring - body.linearVelocity * positionDamping;
+            // Compensate for camera motion without teleporting the hand or held objects.
+            Vector3 localTarget=new Vector3(reachOffset.x,reachOffset.y,distanceFromCamera);
+            Vector3 cameraVelocity=(cameraPivot.TransformPoint(localTarget)-(previousCameraPosition+previousCameraRotation*localTarget))/Time.fixedDeltaTime;
+            if(UsesObjectFrame)cameraVelocity=Vector3.zero;
+            previousCameraPosition=cameraPivot.position;previousCameraRotation=cameraPivot.rotation;
+            if(rotateWithCamera && !UsesObjectFrame)body.MoveRotation(cameraPivot.rotation*rotationInCamera);
+            Vector3 force = (target - body.position) * positionSpring + (Vector3.ClampMagnitude(cameraVelocity,20f)-body.linearVelocity) * positionDamping;
             body.AddForce(Vector3.ClampMagnitude(force, maximumForce), ForceMode.Force);
         }
     }

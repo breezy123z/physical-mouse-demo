@@ -8,15 +8,24 @@ namespace PhysicalMouseDemo
     {
         [Header("Rebind these actions in the Inspector")]
         [SerializeField] private InputAction pointer = new InputAction("Pointer", InputActionType.Value, "<Mouse>/delta");
-        [SerializeField] private InputAction cameraLook = new InputAction("Camera Look", InputActionType.Button, "<Mouse>/leftButton");
-        [SerializeField] private InputAction grab = new InputAction("Grab / Interact", InputActionType.Button, "<Keyboard>/e");
+        [SerializeField] private InputAction cameraLook = new InputAction("Camera Look", InputActionType.Button, "<Mouse>/rightButton");
+        [SerializeField] private InputAction grab = new InputAction("Grab / Interact", InputActionType.Button, "<Mouse>/leftButton");
         [SerializeField] private InputAction point = new InputAction("Point / Teleport (reserved)", InputActionType.Button, "<Mouse>/middleButton");
         [SerializeField] private InputAction selection = new InputAction("Options / Selection (reserved)", InputActionType.Button, "<Keyboard>/tab");
         [SerializeField] private InputAction depth = new InputAction("Reach depth", InputActionType.Value, "<Mouse>/scroll/y");
         [SerializeField] private InputAction releaseCursor = new InputAction("Release cursor", InputActionType.Button, "<Keyboard>/escape");
         [SerializeField] private bool captureOnStart = true;
 
-        [SerializeField] private InputAction depthDrag = new InputAction("Depth drag", InputActionType.Button, "<Mouse>/rightButton");
+        [SerializeField] private InputAction depthDrag = new InputAction("Depth drag", InputActionType.Button, "<Keyboard>/leftShift");
+        [SerializeField] private InputAction toggleEdgeTurn = new InputAction("Toggle edge turning", InputActionType.Button, "<Keyboard>/t");
+        public bool EdgeTogglePressed => enabled && Captured && toggleEdgeTurn.WasPressedThisFrame();
+        public string EdgeToggleBinding => toggleEdgeTurn.GetBindingDisplayString();
+        public void SetMovementBindings()
+        {
+            cameraLook.ChangeBinding(0).WithPath("<Mouse>/rightButton");
+            grab.ChangeBinding(0).WithPath("<Mouse>/leftButton");
+            depthDrag.ChangeBinding(0).WithPath("<Keyboard>/leftShift");
+        }
         public bool DepthHeld => enabled && Captured && depthDrag.IsPressed();
         public string DepthBinding => depthDrag.GetBindingDisplayString();
         public void SetGrabBinding(string path) { grab.ChangeBinding(0).WithPath(path); }
@@ -33,7 +42,7 @@ namespace PhysicalMouseDemo
         public string PointBinding => point.GetBindingDisplayString();
         public string SelectionBinding => selection.GetBindingDisplayString();
 
-        private InputAction[] Actions => new[] { pointer, cameraLook, grab, point, selection, depth, releaseCursor, depthDrag };
+        private InputAction[] Actions => new[] { pointer, cameraLook, grab, point, selection, depth, releaseCursor, depthDrag, toggleEdgeTurn };
         private void OnEnable() { foreach (var action in Actions) action.Enable(); }
         private void Start() { SetCapture(captureOnStart); }
         private void Update()

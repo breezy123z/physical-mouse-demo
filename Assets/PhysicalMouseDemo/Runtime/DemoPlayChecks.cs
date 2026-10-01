@@ -40,10 +40,16 @@ namespace PhysicalMouseDemo
             var input=FindFirstObjectByType<PlayerInputController>();var hand=FindFirstObjectByType<PhysicalHandController>();var grab=hand.GetComponent<GrabInteractor>();var look=FindFirstObjectByType<CameraLookController>();
             input.enabled=false;look.enabled=false;
             Check("Input System bindings exist",!string.IsNullOrEmpty(input.LookBinding)&&!string.IsNullOrEmpty(input.GrabBinding)&&!string.IsNullOrEmpty(input.PointBinding)&&!string.IsNullOrEmpty(input.SelectionBinding));
+            var edge=look.GetComponent<EdgeTurnController>();
+            Check("Edge mode exists",edge!=null);
+            Check("Edge center does not turn",edge.EvaluateViewport(new Vector3(.5f,.5f,1))==Vector2.zero);
+            Check("Edge directions",edge.EvaluateViewport(new Vector3(.99f,.5f,1)).x>0 && edge.EvaluateViewport(new Vector3(.01f,.5f,1)).x<0 && edge.EvaluateViewport(new Vector3(.5f,.99f,1)).y>0 && edge.EvaluateViewport(new Vector3(.5f,.01f,1)).y<0);
+            Check("Behind camera does not turn",edge.EvaluateViewport(new Vector3(.99f,.5f,-1))==Vector2.zero);
+            edge.ModeEnabled=false;Check("Edge toggle off stops requests",edge.EvaluateViewport(new Vector3(.99f,.5f,1))==Vector2.zero);edge.ModeEnabled=true;
             float depthBefore=hand.Depth;hand.MovePointer(new Vector2(0,40),true);
-            Check("RMB depth drag moves away",hand.Depth>depthBefore);
-            hand.MovePointer(new Vector2(0,-40),true);Check("RMB depth drag moves closer",Mathf.Abs(hand.Depth-depthBefore)<.001f);
-            hand.AddPointerDelta(new Vector2(100000,100000));Check("Hand target bounds",hand.ReachOffset.x<=1.051f&&hand.ReachOffset.y<=.701f);
+            Check("Depth drag moves away",hand.Depth>depthBefore);
+            hand.MovePointer(new Vector2(0,-40),true);Check("Depth drag moves closer",Mathf.Abs(hand.Depth-depthBefore)<.001f);
+            hand.AddPointerDelta(new Vector2(100000,100000));Check("Hand target bounds",hand.ReachOffset.x<=hand.MaximumReach.x+.001f&&hand.ReachOffset.y<=hand.MaximumReach.y+.001f);
             hand.AimAtWorldPoint(new Vector3(0,1.1f,0.1f));for(int i=0;i<45;i++)yield return tick;
             var visual=hand.GetComponentInChildren<HandVisual>();
             Check("Animated hand model present",visual && visual.GetComponentsInChildren<Renderer>().Length>=39 && !hand.GetComponent<Renderer>().enabled);
@@ -62,6 +68,16 @@ namespace PhysicalMouseDemo
                 for(int i=0;i<15;i++)yield return tick;
                 Check(name+" hand closes",visual && visual.GripBlend>.9f);
                 float lift=rb.position.y-start;if(name=="GrabCube")lightLift=lift;else heavyLift=lift;
+                if(name=="GrabCube")
+                {
+                    var cameraFrame=Camera.main.transform.parent;Quaternion startRotation=cameraFrame.rotation;
+                    for(int i=1;i<=30;i++) { cameraFrame.rotation=startRotation*Quaternion.Euler(0,i*.4f,0);yield return tick; }
+                    Check("Carrying survives camera turn",grab.IsHolding && grab.Held.Body==rb);
+                    Vector3 inView=cameraFrame.InverseTransformPoint(hand.Body.position);
+                    Check("Hand stays near camera-relative carrying target",Vector3.Distance(inView,new Vector3(hand.ReachOffset.x,hand.ReachOffset.y,hand.Depth))<.18f,inView.ToString());
+                    Check("Hand rotates with camera",Quaternion.Angle(hand.Body.rotation,cameraFrame.rotation)<1f);
+                    for(int i=29;i>=0;i--) { cameraFrame.rotation=startRotation*Quaternion.Euler(0,i*.4f,0);yield return tick; }
+                }
                 Vector3 velocity=rb.linearVelocity;grab.Release();
                 Check(name+" release preserves velocity",(rb.linearVelocity-velocity).sqrMagnitude<.000001f,"speed "+velocity.magnitude);
                 for(int i=0;i<35;i++)yield return tick;

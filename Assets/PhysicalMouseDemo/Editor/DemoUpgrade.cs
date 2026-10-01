@@ -15,7 +15,7 @@ namespace PhysicalMouseDemo.Editor
             var scene=UnityEngine.SceneManagement.SceneManager.GetActiveScene();
             if(scene.name!="PhysicalMouseDemo")return;
             EditorSceneManager.SaveScene(scene,AssetDatabase.GenerateUniqueAssetPath("Assets/PhysicalMouseDemo/Backups/BeforeHandUpgrade.unity"),true);
-            var input=Object.FindFirstObjectByType<PlayerInputController>();input.SetGrabBinding("<Keyboard>/e");EditorUtility.SetDirty(input);
+            var input=Object.FindFirstObjectByType<PlayerInputController>();input.SetMovementBindings();EditorUtility.SetDirty(input);
             foreach(var control in Object.FindObjectsByType<ConstrainedInteractable>(FindObjectsSortMode.None))
             {
                 var g=control.GetComponent<Grabbable>();bool lever=control.GetComponent<HingeJoint>();
@@ -29,7 +29,8 @@ namespace PhysicalMouseDemo.Editor
             }
             const string asset="Assets/PhysicalMouseDemo/Hand/Hand_AllAnimations.fbx";
             var importer=(ModelImporter)AssetImporter.GetAtPath(asset);importer.animationType=ModelImporterAnimationType.Generic;importer.importAnimation=true;importer.SaveAndReimport();
-            var hand=Object.FindFirstObjectByType<PhysicalHandController>();
+            var hand=Object.FindFirstObjectByType<PhysicalHandController>();hand.ConfigureViewReach();
+            var edge=input.GetComponent<EdgeTurnController>();if(!edge)edge=input.gameObject.AddComponent<EdgeTurnController>();edge.Configure(input,hand,Camera.main);EditorUtility.SetDirty(edge);EditorUtility.SetDirty(hand);
             var old=hand.transform.Find("HandVisual");if(old)Object.DestroyImmediate(old.gameObject);
             var wrapper=new GameObject("HandVisual");wrapper.transform.SetParent(hand.transform,false);wrapper.transform.localScale=Vector3.one/hand.transform.lossyScale.x;
             var model=(GameObject)PrefabUtility.InstantiatePrefab(AssetDatabase.LoadAssetAtPath<GameObject>(asset),wrapper.transform);

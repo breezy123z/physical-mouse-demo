@@ -21,20 +21,21 @@ namespace PhysicalMouseDemo
         [SerializeField] private float pitch;
         private float yaw;
         private Quaternion initialRotation;
+        private EdgeTurnController edgeTurn;
         public Vector2 AngularVelocity => angularVelocity;
         public float Pitch => pitch;
         public float Yaw => yaw;
         public void Configure(PlayerInputController source, Transform pivot) { input = source; cameraPivot = pivot; }
-        private void Awake() { initialRotation = cameraPivot ? cameraPivot.localRotation : Quaternion.identity; }
-        private void Update() { if (input && cameraPivot) Step(input.PointerDelta, input.LookHeld, Time.deltaTime); }
+        private void Awake() { edgeTurn=GetComponent<EdgeTurnController>();initialRotation = cameraPivot ? cameraPivot.localRotation : Quaternion.identity; }
+        private void Update() { if (input && cameraPivot) Step(input.PointerDelta, input.LookHeld, Time.deltaTime, edgeTurn ? edgeTurn.GetRequestedVelocity(input.LookHeld) : Vector2.zero); }
 
         // Mouse delta is already integrated over one frame. Convert it to deg/sec before filtering.
-        public void Step(Vector2 mousePixels, bool looking, float dt)
+        public void Step(Vector2 mousePixels, bool looking, float dt, Vector2 edgeVelocity = default)
         {
             if (!cameraPivot || dt <= 0f) return;
-            if (looking)
+            if (looking || edgeVelocity.sqrMagnitude > .0001f)
             {
-                var requested = Vector2.ClampMagnitude(mousePixels * sensitivity / dt, maximumAngularSpeed);
+                var requested = Vector2.ClampMagnitude(looking ? mousePixels * sensitivity / dt : edgeVelocity, maximumAngularSpeed);
                 angularVelocity = Vector2.Lerp(angularVelocity, requested, 1f - Mathf.Exp(-acceleration * dt));
             }
             else angularVelocity *= Mathf.Exp(-damping * dt);
