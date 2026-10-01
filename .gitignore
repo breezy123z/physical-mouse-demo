@@ -1,0 +1,29 @@
+# Unity regenerates these locally.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Bb]uild/
+/[Bb]uilds/
+/MemoryCaptures/
+/Recordings/
+/.vs/
+/.vscode/
+*.csproj
+*.sln
+*.slnx
+*.user
+*.pidb
+*.suo
+*.unitypackage
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
+# Keep local scene recovery copies and machine-specific setup out of the team repo.
+/Assets/PhysicalMouseDemo/Backups/
+/Assets/PhysicalMouseDemo/Backups.meta
+/Assets/PhysicalMouseDemo/Editor/PhysicalMouseMcpBootstrap.cs*
+/Assets/PhysicalMouseDemo/Editor/McpConnectionProbe.cs*
